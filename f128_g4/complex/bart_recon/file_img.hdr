@@ -1,8 +1,0 @@
-# Dimensions
-256 320 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
-# Command
-pics -S -e -R W:3:0:0.007000 -i 100 f128_g4/complex/bart_recon/file_ks f128_g4/complex/bart_recon/file_sensemap f128_g4/complex/bart_recon/file_img 
-# Files
- >f128_g4/complex/bart_recon/file_img <f128_g4/complex/bart_recon/file_sensemap <f128_g4/complex/bart_recon/file_ks
-# Creator
-BART v0.4.02
