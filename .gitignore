@@ -104,3 +104,7 @@ ENV/
 events*
 checkpoint*
 graph*
+
+#data
+raw*
+tmp*
