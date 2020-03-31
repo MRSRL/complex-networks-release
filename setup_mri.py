@@ -26,11 +26,11 @@ def main(argv):
 
     if verbose:
         print("<<< Downloading data... >>>")
-    # mri_prep.download_dataset_knee(dir_download, verbose=verbose)
+    mri_prep.download_dataset_knee(dir_download, verbose=verbose)
 
     if verbose:
         print("<<< Creating masks... >>>")
-    # mri_prep.create_masks(dir_masks, verbose=verbose)
+    mri_prep.create_masks(dir_masks, verbose=verbose)
 
     if verbose:
         print("<<< Preparing TFRecords...>>>")
