@@ -3,8 +3,6 @@ from math import pi
 import numpy as np
 import tensorflow as tf
 
-from mri_util import tf_util
-
 
 def complex_conv(
     tf_input, num_features, kernel_size, stride=1, data_format="channels_last"
