@@ -29,31 +29,23 @@ def _batch_norm_relu(tf_input, data_format="channels_last", training=False, acti
         tf_input, data_format=data_format, training=training)
     input_shape = tf.shape(tf_output)
 
-    if(activation == "relu"):
+    if(activation == "relu" or "crelu"):
         tf_output = tf.nn.relu(tf_output)
+    else:
+        # convert two channels to complex-valued in preparation for complex-valued activation functions
+        tf_output = tf_util.channels_to_complex(tf_output)
 
-    if(activation == "zrelu"):
-        tf_output = complex_utils.zrelu(tf_output, data_format)
+        if(activation == "zrelu"):
+            tf_output = complex_utils.zrelu(tf_output)
 
-    if(activation == "modrelu"):
-        tf_output = complex_utils.modrelu(tf_output, data_format)
+        if(activation == "modrelu"):
+            tf_output = complex_utils.modrelu(tf_output, data_format)
 
-    if(activation == "cardioid"):
-        # Reshape into complex number
-        real = tf_util.getReal(tf_output, data_format)
-        imag = tf_util.getImag(tf_output, data_format)
-        comp = tf.complex(real, imag)
-        tf_output = complex_utils.cardioid(comp)
+        if(activation == "cardioid"):
+            tf_output = complex_utils.cardioid(tf_output)
 
-        realOut = tf.real(tf_output)
-        imagOut = tf.imag(tf_output)
-       # Interleave
-        if data_format == "channels_last":
-            tf_output = tf.concat([realOut, imagOut], 2)
-        else:
-            tf_output = tf.concat([realOut, imagOut], 0)
-
-        tf_output = tf.reshape(tf_output, input_shape)
+        # convert complex back to two channels
+        tf_output = tf_util.complex_to_channels(tf_output)
 
     return tf_output
 
@@ -118,11 +110,12 @@ def _conv2d(
         )
     if type_conv == "complex":
         print("complex convolution")
+        # channels to complex
+        tf_output = tf_util.channels_to_complex(tf_output)
+
         if num_features != 2:
             num_features = num_features // 2
-        check = (
-            tf_input.dtype is not tf.complex64 and tf_input.dtype is not tf.complex128
-        )
+            
         tf_output = complex_utils.complex_conv(
             tf_output, num_features=num_features, kernel_size=kernel_size)
 
@@ -137,364 +130,9 @@ def _conv2d(
             imag_out = tf.concat([imag_out, imag_conj], axis=-1)
 
             tf_output = tf.concat([real_out, imag_out], axis=-1)
-    if type_conv == "quaternion":
-        if num_features != 2:
-            num_features = num_features // (2 * np.sqrt(2))
-        tf_real, tf_x, tf_y, tf_z = tf.split(
-            tf_output, num_or_size_splits=4, axis=1)
 
-        with tf.variable_scope(None, default_name="quaternion_convolution"):
-            tf_Real_real = tf.layers.conv2d(
-                tf_real,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Real_conv",
-                data_format=data_format,
-            )
-            tf_Real_x = tf.layers.conv2d(
-                tf_x,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Real_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_Real_y = tf.layers.conv2d(
-                tf_y,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Real_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_Real_z = tf.layers.conv2d(
-                tf_z,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Real_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_X_real = tf.layers.conv2d(
-                tf_real,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="X_conv",
-                data_format=data_format,
-            )
-            tf_X_x = tf.layers.conv2d(
-                tf_x,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="X_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_X_y = tf.layers.conv2d(
-                tf_y,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="X_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_X_z = tf.layers.conv2d(
-                tf_z,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="X_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_Y_real = tf.layers.conv2d(
-                tf_real,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Y_conv",
-                data_format=data_format,
-            )
-            tf_Y_x = tf.layers.conv2d(
-                tf_x,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Y_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_Y_y = tf.layers.conv2d(
-                tf_y,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Y_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_Y_z = tf.layers.conv2d(
-                tf_z,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Y_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_Z_real = tf.layers.conv2d(
-                tf_real,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Z_conv",
-                data_format=data_format,
-            )
-            tf_Z_x = tf.layers.conv2d(
-                tf_x,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Z_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_Z_y = tf.layers.conv2d(
-                tf_y,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Z_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_Z_z = tf.layers.conv2d(
-                tf_z,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Z_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-
-        real_out = tf_Real_real - tf_X_x - tf_Y_y - tf_Z_z
-        x_out = tf_Real_x + tf_X_real + tf_Y_z - tf_Z_y
-        y_out = tf_Real_y - tf_X_z + tf_Y_real + tf_Z_x
-        z_out = tf_Real_z + tf_X_y - tf_Y_x + tf_Z_real
-
-        tf_output = tf.concat([real_out, x_out, y_out, z_out], axis=1)
-
-    if type_conv == "batch_quaternion":
-        if num_features == 2:
-            num_features = num_features // 2
-        else:
-            num_features = int(num_features * 2 * np.sqrt(2))
-
-        tf_real = tf_output[0, :, :, 0]
-        tf_x = tf_output[0, :, :, 1]
-        tf_y = tf_output[1, :, :, 0]
-        tf_z = tf_output[1, :, :, 1]
-
-        tf_real = tf.expand_dims(tf_real, -1)
-        tf_x = tf.expand_dims(tf_x, -1)
-        tf_y = tf.expand_dims(tf_y, -1)
-        tf_z = tf.expand_dims(tf_z, -1)
-
-        tf_real = tf.expand_dims(tf_real, 0)
-        tf_x = tf.expand_dims(tf_x, 0)
-        tf_y = tf.expand_dims(tf_y, 0)
-        tf_z = tf.expand_dims(tf_z, 0)
-
-        with tf.variable_scope(None, default_name="quaternion_convolution"):
-            tf_Real_real = tf.layers.conv2d(
-                tf_real,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Real_conv",
-                data_format=data_format,
-            )
-            tf_Real_x = tf.layers.conv2d(
-                tf_x,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Real_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_Real_y = tf.layers.conv2d(
-                tf_y,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Real_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_Real_z = tf.layers.conv2d(
-                tf_z,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Real_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_X_real = tf.layers.conv2d(
-                tf_real,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="X_conv",
-                data_format=data_format,
-            )
-            tf_X_x = tf.layers.conv2d(
-                tf_x,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="X_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_X_y = tf.layers.conv2d(
-                tf_y,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="X_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_X_z = tf.layers.conv2d(
-                tf_z,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="X_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_Y_real = tf.layers.conv2d(
-                tf_real,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Y_conv",
-                data_format=data_format,
-            )
-            tf_Y_x = tf.layers.conv2d(
-                tf_x,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Y_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_Y_y = tf.layers.conv2d(
-                tf_y,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Y_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_Y_z = tf.layers.conv2d(
-                tf_z,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Y_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_Z_real = tf.layers.conv2d(
-                tf_real,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Z_conv",
-                data_format=data_format,
-            )
-            tf_Z_x = tf.layers.conv2d(
-                tf_x,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Z_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_Z_y = tf.layers.conv2d(
-                tf_y,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Z_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-            tf_Z_z = tf.layers.conv2d(
-                tf_z,
-                num_features,
-                kernel_size,
-                padding="same",
-                use_bias=False,
-                name="Z_conv",
-                reuse=True,
-                data_format=data_format,
-            )
-
-        real_out = tf_Real_real - tf_X_x - tf_Y_y - tf_Z_z
-        x_out = tf_Real_x + tf_X_real + tf_Y_z - tf_Z_y
-        y_out = tf_Real_y - tf_X_z + tf_Y_real + tf_Z_x
-        z_out = tf_Real_z + tf_X_y - tf_Y_x + tf_Z_real
-
-        tf_batch_1 = tf.concat([real_out, x_out], axis=-1)
-        tf_batch_2 = tf.concat([y_out, z_out], axis=-1)
-        tf_output = tf.concat([tf_batch_1, tf_batch_2], axis=0)
+        # complex to channels
+        tf_output = tf_util.complex_to_channels(tf_output)
 
     if circular:
         shape_input = tf.shape(tf_input)

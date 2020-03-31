@@ -257,7 +257,7 @@ def main(_):
             summary_writer.add_summary(total_summary_run, step)
 
             # save checkpoint every 500 steps
-            if (step - 1) % 500 == 0:
+            if step % 500 == 0:
                 print("saving checkpoint")
                 saver.save(sess, model_dir + "/model.ckpt")
 

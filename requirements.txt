@@ -4,7 +4,6 @@ scipy>=0.19.1
 tensorflow-gpu>=1.4.1
 wget>=3.2
 theano
-keras
 intervaltree
 kerosene
 mimir

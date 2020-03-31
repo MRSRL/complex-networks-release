@@ -2,13 +2,15 @@ WORK_DIR=~/Workspace/complex-networks-release
 DATASET_DIR=/home_local/ekcole/knee_data
 MASKS_PATH=/home_local/ekcole/knee_masks
 
-TYPE=complex
-STEPS=4
-FEAT=256
+TYPE=real
+STEPS=1
+FEAT=10
+ACTIVATION=relu
 
 LOG_DIR="/home_local/ekcole/f"$FEAT"_g4"
+# LOG_DIR="f"$FEAT"_g"$STEPS
 python3 $WORK_DIR/train_loop.py \
-    --train_dir $TYPE \
+    --train_dir $TYPE"_"$ACTIVATION \
     --mask_path $MASKS_PATH \
     --dataset_dir $DATASET_DIR \
     --log_root $LOG_DIR \
@@ -19,7 +21,7 @@ python3 $WORK_DIR/train_loop.py \
     --max_steps 50000 \
     --feat_map $FEAT \
     --num_grad_steps 4 \
-    --activation cardioid \
+    --activation $ACTIVATION \
     --conv $TYPE
 
 #testing
