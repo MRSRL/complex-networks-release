@@ -51,7 +51,7 @@ If running real convolution, the activation must be relu.
 
 LOG_DIR indicates the directory checkpoints and training logs are saved to. You can view a tensorboard summary for this training run by running:
 
-tensorboard --logdir=./
+    tensorboard --logdir=./
 
 in this directory.
 
