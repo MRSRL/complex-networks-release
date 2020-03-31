@@ -68,8 +68,10 @@ def create_masks(
     shape_y=320,
     shape_z=256,
     verbose=False,
-    acc_y=(1, 2, 3),
-    acc_z=(1, 2, 3),
+    # acc_y=(1, 2, 3),
+    acc_y=(1,2),
+    # acc_z=(1, 2, 3),
+    acc_z=(1,2),
     shape_calib=1,
     variable_density=False,
     num_repeat=4,
@@ -150,7 +152,8 @@ def setup_data_tfrecords(
 
     i_train_1 = np.round(data_divide[0] * num_cases).astype(int)
     i_validate_0 = i_train_1 + 1
-    i_validate_1 = np.round(data_divide[1] * num_cases).astype(int) + i_validate_0
+    i_validate_1 = np.round(
+        data_divide[1] * num_cases).astype(int) + i_validate_0
 
     if not os.path.exists(dir_out):
         os.mkdir(dir_out)
@@ -182,7 +185,8 @@ def setup_data_tfrecords(
             min_shape[0] <= kspace.shape[1] and min_shape[1] <= kspace.shape[2]
         ):
             if verbose:
-                print("  Slice shape: (%d, %d)" % (kspace.shape[1], kspace.shape[2]))
+                print("  Slice shape: (%d, %d)" %
+                      (kspace.shape[1], kspace.shape[2]))
                 print("  Num channels: %d" % kspace.shape[0])
             shape_x = kspace.shape[-1]
             kspace = fftc.ifftc(kspace, axis=-1)
