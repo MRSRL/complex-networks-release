@@ -11,7 +11,7 @@ import tensorflow as tf
 from tensorflow.python.util import deprecation
 
 import mri_data
-from models import mri_model_original as mri_model
+import mri_model
 from mri_util import cfl, fftc, metrics, tf_util
 
 BIN_BART = "bart"
@@ -150,7 +150,7 @@ def main(_):
             os.path.join(FLAGS.dataset_dir, "test"),
             FLAGS.mask_path,
             num_channels=FLAGS.num_channels,
-            num_maps=FLAGS.num_emaps,
+            num_emaps=FLAGS.num_emaps,
             batch_size=FLAGS.batch_size,
             out_shape=out_shape,
         )
@@ -177,8 +177,6 @@ def main(_):
             do_conjugate=FLAGS.do_conjugate,
         )
 
-        # _create_summary(sense_place, ks_place, im_out_place, im_truth_place)
-
         saver = tf.train.Saver()
         summary_writer = tf.summary.FileWriter(model_dir, sess.graph)
 
@@ -197,7 +195,6 @@ def main(_):
                 variable_parameters *= dim.value
             total_parameters += variable_parameters
         print("Total number of trainable parameters: %d" % total_parameters)
-        tf.summary.scalar("parameters/parameters", total_parameters)
 
         test_iterator = test_dataset.make_one_shot_iterator()
         features, labels = test_iterator.get_next()
@@ -231,8 +228,8 @@ def main(_):
             )
 
             # CS recon
-            # bart_test = bart_cs(bart_dir, ks_in_run, sense_in_run, l1=0.007)
-            bart_test = None
+            bart_test = bart_cs(bart_dir, ks_in_run, sense_in_run, l1=0.007)
+            # bart_test = None
 
             # handle batch dimension
             for b in range(FLAGS.batch_size):
@@ -244,7 +241,7 @@ def main(_):
                 output_nrmse.append(nrmse)
                 output_ssim.append(ssim)
 
-            print("output psnr, nrmse, ssim")
+            print("output mean +/ standard deviation psnr, nrmse, ssim")
             print(
                 np.mean(output_psnr),
                 np.std(output_psnr),
@@ -254,23 +251,22 @@ def main(_):
                 np.std(output_ssim),
             )
 
-            # psnr, nrmse, ssim = metrics.compute_all(
-            #     im_truth_run, bart_test, sos_axis=-1
-            # )
-            # cs_psnr.append(psnr)
-            # cs_nrmse.append(nrmse)
-            # cs_ssim.append(ssim)
+            psnr, nrmse, ssim = metrics.compute_all(
+                im_truth_run, bart_test, sos_axis=-1
+            )
+            cs_psnr.append(psnr)
+            cs_nrmse.append(nrmse)
+            cs_ssim.append(ssim)
 
-            # print("cs psnr, nrmse, ssim")
-            # print(
-            #     np.mean(cs_psnr),
-            #     np.std(cs_psnr),
-            #     np.mean(cs_nrmse),
-            #     np.std(cs_nrmse),
-            #     np.mean(cs_ssim),
-            #     np.std(cs_ssim),
-            # )
-            # sess.run(update_counter)
+            print("cs mean +/ standard deviation psnr, nrmse, ssim")
+            print(
+                np.mean(cs_psnr),
+                np.std(cs_psnr),
+                np.mean(cs_nrmse),
+                np.std(cs_nrmse),
+                np.mean(cs_ssim),
+                np.std(cs_ssim),
+            )
         print("End of testing loop")
         txt_path = os.path.join(model_dir, "metrics.txt")
         f = open(txt_path, "w")
@@ -293,20 +289,20 @@ def main(_):
             + " +\- "
             + str(np.std(output_ssim))
             + "\n"
-            # "cs psnr = "
-            # + str(np.mean(cs_psnr))
-            # + " +\- "
-            # + str(np.std(cs_psnr))
-            # + "\n"
-            # + "output nrmse = "
-            # + str(np.mean(cs_nrmse))
-            # + " +\- "
-            # + str(np.std(cs_nrmse))
-            # + "\n"
-            # + "output ssim = "
-            # + str(np.mean(cs_ssim))
-            # + " +\- "
-            # + str(np.std(cs_ssim))
+            "cs psnr = "
+            + str(np.mean(cs_psnr))
+            + " +\- "
+            + str(np.std(cs_psnr))
+            + "\n"
+            + "output nrmse = "
+            + str(np.mean(cs_nrmse))
+            + " +\- "
+            + str(np.std(cs_nrmse))
+            + "\n"
+            + "output ssim = "
+            + str(np.mean(cs_ssim))
+            + " +\- "
+            + str(np.std(cs_ssim))
         )
         f.close()
 
@@ -348,9 +344,6 @@ def bart_cs(bart_dir, ks, sensemap, l1=0.01):
 
 def load_recon(file, file_sensemap):
     bart_recon = np.squeeze(cfl.read(file))
-    #         print("bart recon")
-    #         print(bart_recon.ndim)
-    # 18, 80, 180
     if bart_recon.ndim == 2:
         bart_recon = np.transpose(bart_recon, [1, 0])
         bart_recon = np.expand_dims(bart_recon, axis=0)
@@ -358,7 +351,7 @@ def load_recon(file, file_sensemap):
     if bart_recon.ndim == 3:
         bart_recon = np.transpose(bart_recon, [2, 1, 0])
         bart_recon = np.expand_dims(bart_recon, axis=-1)
-    #         print(bart_recon.shape)
+
     return bart_recon
 
 
@@ -370,40 +363,10 @@ def calculate_metrics(output, bart_test, truth):
     output_nrmse = []
     output_ssim = []
 
-    # complex_truth = tf_util.channels_to_complex(sample_truth)
-    # complex_truth = sess.run(complex_truth)
-
-    # psnr, nrmse, ssim = metrics.compute_all(complex_truth, bart_test, sos_axis=-1)
-    # cs_psnr.append(psnr)
-    # cs_nrmse.append(nrmse)
-    # cs_ssim.append(ssim)
-    # print("truth", truth.shape)
-    # print("output", output.shape)
-
     psnr, nrmse, ssim = metrics.compute_all(truth, output, sos_axis=-1)
     output_psnr.append(psnr)
     output_nrmse.append(nrmse)
     output_ssim.append(ssim)
-
-    # print("cs psnr, nrmse, ssim")
-    # print(
-    #     np.mean(cs_psnr),
-    #     np.std(cs_psnr),
-    #     np.mean(cs_nrmse),
-    #     np.std(cs_nrmse),
-    #     np.mean(cs_ssim),
-    #     np.std(cs_ssim),
-    # )
-    print(output_psnr)
-    print("output psnr, nrmse, ssim")
-    print(
-        np.mean(output_psnr),
-        np.std(output_psnr),
-        np.mean(output_nrmse),
-        np.std(output_nrmse),
-        np.mean(output_ssim),
-        np.std(output_ssim),
-    )
 
 
 def _create_summary(sense_place, ks_place, im_out_place, im_truth_place):
