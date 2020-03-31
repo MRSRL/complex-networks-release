@@ -55,6 +55,8 @@ tensorboard --logdir=./
 
 in this directory.
 
+Various complex-valued utility functions are in complex_utils.py. This includes complex-valued convolution, complex-valued transposed convolution, and various complex-valeud activation functions such as CReLU, zReLU, modReLU, and cardioid.
+
 ## References
 1. https://github.com/mrirecon/bart
 2. http://mridata.org
