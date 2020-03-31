@@ -1,8 +1,0 @@
-# Dimensions
-1 320 256 1 1 
-# Command
-poisson -C 1 -Y 320 -Z 256 -y 2 -z 2 -s 204900 masks/mask_2.0x2.0_c1_01 
-# Files
- >masks/mask_2.0x2.0_c1_01
-# Creator
-BART v0.4.03-4-gd149bc8
