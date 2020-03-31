@@ -30,7 +30,7 @@ def download_dataset_knee(dir_out, dir_tmp="tmp", verbose=False, do_cleanup=True
         if verbose:
             print("Processing data (%d)..." % i)
 
-        url = "http://mridata.org/knees/fully_sampled/p%d/e1/s1/P%d.zip" % (
+        url = "http://old.mridata.org/knees/fully_sampled/p%d/e1/s1/P%d.zip" % (
             i + 1,
             i + 1,
         )

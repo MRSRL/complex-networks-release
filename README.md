@@ -8,7 +8,7 @@ Image Reconstruction using an Unrolled DL Architecture including Complex-Valued 
 ## Setup
 Make sure the python requirements are installed
 
-    pip install -r requirements.txt
+    pip3 install -r requirements.txt
 
 The setup assumes that the latest Berkeley Advanced Reconstruction Toolbox is installed [1]. The scripts have all been tested with v0.4.01.
 
@@ -41,8 +41,11 @@ The training can be ran using the following script in the same folder as the pre
         --conv $TYPE
 
 TYPE denotes the type of convolution; options include "real" or "complex".
+
 ITERATIONS denotes the number of iterations in the unrolled architecture.
+
 FEAT denotes the number of feature maps in each convolution layer.
+
 ACTIVATION denotes the activation function used after each convolution layer; options include "relu", "crelu", "zrelu", "modrelu", and "cardioid" [3].
 If running real convolution, the activation must be relu.
 
