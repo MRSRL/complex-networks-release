@@ -24,7 +24,7 @@ The training can be ran using the following script in the same folder as the pre
     ITERATIONS=4
     FEAT=256
     ACTIVATION=cardioid
-    LOG_DIR="/f"$FEAT"_g4"
+    LOG_DIR="f"$FEAT"_g"$ITERATIONS
     python3 train_loop.py \
         --train_dir $TYPE"_"$ACTIVATION \
         --mask_path masks \
@@ -48,6 +48,12 @@ FEAT denotes the number of feature maps in each convolution layer.
 
 ACTIVATION denotes the activation function used after each convolution layer; options include "relu", "crelu", "zrelu", "modrelu", and "cardioid" [3].
 If running real convolution, the activation must be relu.
+
+LOG_DIR indicates the directory checkpoints and training logs are saved to. You can view a tensorboard summary for this training run by running:
+
+tensorboard --logdir=./
+
+in this directory.
 
 ## References
 1. https://github.com/mrirecon/bart

@@ -30,7 +30,7 @@ def main(argv):
 
     if verbose:
         print("<<< Creating masks... >>>")
-    mri_prep.create_masks(dir_masks, verbose=verbose)
+    # mri_prep.create_masks(dir_masks, verbose=verbose)
 
     if verbose:
         print("<<< Preparing TFRecords...>>>")
