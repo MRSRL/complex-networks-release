@@ -6,7 +6,7 @@ Image Reconstruction using an Unrolled DL Architecture including Complex-Valued 
 * 2018 Chris Sandino, Stanford University
 
 ## Complex-Valued Utilities
-If you are only interested in the complex-valued utilities, they are located in complex_util.py. This includes complex-valued convolution, complex-valued transposed convolution, and the CReLU, modReLU, zReLU, and cardioid activation functions.
+If you are only interested in the complex-valued utilities, they are located in complex_utils.py. This includes complex-valued convolution, complex-valued transposed convolution, and the CReLU, modReLU, zReLU, and cardioid activation functions.
 
 ## Setup
 Make sure the python requirements are installed
