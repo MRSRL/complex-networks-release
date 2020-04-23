@@ -5,8 +5,11 @@ import tensorflow as tf
 
 
 def complex_conv(
-    tf_input, num_features, kernel_size, stride=1, data_format="channels_last"
+    tf_input, num_features, kernel_size, stride=1, data_format="channels_last", dilation_rate=(1, 1), use_bias=True,
+    kernel_initializer=None, kernel_regularizer=None, bias_regularizer=None,
+    activity_regularizer=None, kernel_constraint=None, bias_constraint=None, trainable=True
 ):
+    # allocate half the features to real, half to imaginary
     num_features = num_features // 2
 
     tf_real = tf.real(tf_input)
@@ -14,46 +17,78 @@ def complex_conv(
 
     with tf.variable_scope(None, default_name="complex_conv2d"):
         tf_real_real = tf.layers.conv2d(
-            tf_real,
-            num_features,
-            kernel_size,
-            padding="same",
-            use_bias=False,
-            name="real_conv",
-            data_format=data_format,
+            inputs=tf_real,
+            filters=num_features,
+            kernel_size=kernel_size,
             strides=[stride, stride],
+            padding="same",
+            data_format=data_format,
+            dilation_rate=dilation_rate,
+            activation=None,
+            use_bias=use_bias,
+            kernel_initializer=kernel_initializer,
+            kernel_regularizer=None,
+            bias_regularizer=None,
+            activity_regularizer=None,
+            kernel_constraint=None,
+            bias_constraint=None,
+            name="real_conv",
         )
         tf_imag_real = tf.layers.conv2d(
             tf_imag,
-            num_features,
-            kernel_size,
+            filters=num_features,
+            kernel_size=kernel_size,
+            strides=[stride, stride],
             padding="same",
-            use_bias=False,
+            data_format=data_format,
+            dilation_rate=dilation_rate,
+            activation=None,
+            use_bias=use_bias,
+            kernel_initializer=kernel_initializer,
+            kernel_regularizer=None,
+            bias_regularizer=None,
+            activity_regularizer=None,
+            kernel_constraint=None,
+            bias_constraint=None,
             name="real_conv",
             reuse=True,
-            data_format=data_format,
-            strides=[stride, stride],
         )
         tf_real_imag = tf.layers.conv2d(
             tf_real,
-            num_features,
-            kernel_size,
-            padding="same",
-            use_bias=False,
-            name="imag_conv",
-            data_format=data_format,
+            filters=num_features,
+            kernel_size=kernel_size,
             strides=[stride, stride],
+            padding="same",
+            data_format=data_format,
+            dilation_rate=dilation_rate,
+            activation=None,
+            use_bias=use_bias,
+            kernel_initializer=kernel_initializer,
+            kernel_regularizer=None,
+            bias_regularizer=None,
+            activity_regularizer=None,
+            kernel_constraint=None,
+            bias_constraint=None,
+            name="imag_conv",
         )
         tf_imag_imag = tf.layers.conv2d(
             tf_imag,
-            num_features,
-            kernel_size,
+            filters=num_features,
+            kernel_size=kernel_size,
+            strides=[stride, stride],
             padding="same",
-            use_bias=False,
+            data_format=data_format,
+            dilation_rate=dilation_rate,
+            activation=None,
+            use_bias=use_bias,
+            kernel_initializer=kernel_initializer,
+            kernel_regularizer=None,
+            bias_regularizer=None,
+            activity_regularizer=None,
+            kernel_constraint=None,
+            bias_constraint=None,
             name="imag_conv",
             reuse=True,
-            data_format=data_format,
-            strides=[stride, stride],
         )
     real_out = tf_real_real - tf_imag_imag
     imag_out = tf_imag_real + tf_real_imag
@@ -62,56 +97,86 @@ def complex_conv(
     return tf_output
 
 
-def complex_conv_transpose(
-    tf_input, num_features, kernel_size, stride, data_format="channels_last"
-):
-    num_features = num_features // 2
+def complex_conv_transpose(tf_input, num_features, kernel_size, stride, data_format="channels_last", use_bias=True,
+                           kernel_initializer=None, kernel_regularizer=None, bias_regularizer=None,
+                           activity_regularizer=None, kernel_constraint=None, bias_constraint=None, trainable=True
+                           ):
+    # allocate half the features to real, half to imaginary
+    # num_features = num_features // 2
 
     tf_real = tf.real(tf_input)
     tf_imag = tf.imag(tf_input)
 
     with tf.variable_scope(None, default_name="complex_conv2d"):
         tf_real_real = tf.layers.conv2d_transpose(
-            tf_real,
-            num_features,
-            kernel_size,
-            padding="same",
-            use_bias=False,
-            name="real_conv",
-            data_format=data_format,
+            inputs=tf_real,
+            filters=num_features,
+            kernel_size=kernel_size,
             strides=[stride, stride],
+            padding="same",
+            data_format=data_format,
+            activation=None,
+            use_bias=use_bias,
+            kernel_initializer=kernel_initializer,
+            kernel_regularizer=None,
+            bias_regularizer=None,
+            activity_regularizer=None,
+            kernel_constraint=None,
+            bias_constraint=None,
+            name="real_conv",
         )
         tf_imag_real = tf.layers.conv2d_transpose(
             tf_imag,
-            num_features,
-            kernel_size,
+            filters=num_features,
+            kernel_size=kernel_size,
+            strides=[stride, stride],
             padding="same",
-            use_bias=False,
+            data_format=data_format,
+            activation=None,
+            use_bias=use_bias,
+            kernel_initializer=kernel_initializer,
+            kernel_regularizer=None,
+            bias_regularizer=None,
+            activity_regularizer=None,
+            kernel_constraint=None,
+            bias_constraint=None,
             name="real_conv",
             reuse=True,
-            data_format=data_format,
-            strides=[stride, stride],
         )
         tf_real_imag = tf.layers.conv2d_transpose(
             tf_real,
-            num_features,
-            kernel_size,
-            padding="same",
-            use_bias=False,
-            name="imag_conv",
-            data_format=data_format,
+            filters=num_features,
+            kernel_size=kernel_size,
             strides=[stride, stride],
+            padding="same",
+            data_format=data_format,
+            activation=None,
+            use_bias=use_bias,
+            kernel_initializer=kernel_initializer,
+            kernel_regularizer=None,
+            bias_regularizer=None,
+            activity_regularizer=None,
+            kernel_constraint=None,
+            bias_constraint=None,
+            name="imag_conv",
         )
         tf_imag_imag = tf.layers.conv2d_transpose(
             tf_imag,
-            num_features,
-            kernel_size,
+            filters=num_features,
+            kernel_size=kernel_size,
+            strides=[stride, stride],
             padding="same",
-            use_bias=False,
+            data_format=data_format,
+            activation=None,
+            use_bias=use_bias,
+            kernel_initializer=kernel_initializer,
+            kernel_regularizer=None,
+            bias_regularizer=None,
+            activity_regularizer=None,
+            kernel_constraint=None,
+            bias_constraint=None,
             name="imag_conv",
             reuse=True,
-            data_format=data_format,
-            strides=[stride, stride],
         )
     real_out = tf_real_real - tf_imag_imag
     imag_out = tf_imag_real + tf_real_imag

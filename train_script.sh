@@ -19,23 +19,23 @@ python3 $WORK_DIR/train_loop.py \
     --num_channels 8 \
     --batch_size 2 \
     --device 0 \
-    --max_steps 1 \
+    --max_steps 10000 \
     --feat_map $FEAT \
     --num_grad_steps $ITERATIONS \
     --activation $ACTIVATION \
     --conv $TYPE
 
 # testing
-python3 $WORK_DIR/test_loop.py --train_dir $TYPE \
-    --shape_z 256 --shape_y 320 \
-    --batch_size 1 \
-    --feat_map $FEAT \
-    --num_grad_steps 4 \
-    --mask_path $MASKS_PATH \
-    --dataset_dir $DATASET_DIR \
-    --device 0 \
-    --log_root $LOG_DIR \
-    --num_channels 8 \
-    --activation $ACTIVATION \
-    --gpu single \
-    --conv $TYPE
+# python3 $WORK_DIR/test_loop.py --train_dir $TYPE \
+#     --shape_z 256 --shape_y 320 \
+#     --batch_size 1 \
+#     --feat_map $FEAT \
+#     --num_grad_steps 4 \
+#     --mask_path $MASKS_PATH \
+#     --dataset_dir $DATASET_DIR \
+#     --device 0 \
+#     --log_root $LOG_DIR \
+#     --num_channels 8 \
+#     --activation $ACTIVATION \
+#     --gpu single \
+#     --conv $TYPE
