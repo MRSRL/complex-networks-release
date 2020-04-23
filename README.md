@@ -1,9 +1,12 @@
 # MRI Reconstruction - Unrolled Architecture
 Image Reconstruction using an Unrolled DL Architecture including Complex-Valued Convolution and Activation Functions
-* 2018 Joseph Y. Cheng, Stanford University (jycheng AT stanford DOT edu)
+* 2018 Elizabeth Cole, Stanford University (ekcole@stanford.edu)
+* 2018 Joseph Y. Cheng, Stanford University
 * 2018 Feiyu Chen, Stanford University
 * 2018 Chris Sandino, Stanford University
-* 2018 Elizabeth Cole, Stanford University
+
+## Complex-Valued Utilities
+If you are only interested in the complex-valued utilities, they are located in complex_utils.py. This includes complex-valued convolution, complex-valued transposed convolution, and the CReLU, modReLU, zReLU, and cardioid activation functions.
 
 ## Setup
 Make sure the python requirements are installed
