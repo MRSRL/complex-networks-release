@@ -1,4 +1,4 @@
-Implementation related to the paper "Complex-Valued Convolutional Neural Networks for MRI Reconstruction" by Elizabeth K. Cole et. al: 
+Implementation related to the paper "Complex-Valued Convolutional Neural Networks for MRI Reconstruction" by Elizabeth K. Cole et. al: https://arxiv.org/abs/2004.01738
 
 # MRI Reconstruction - Unrolled Architecture
 Image Reconstruction using an Unrolled DL Architecture including Complex-Valued Convolution and Activation Functions
