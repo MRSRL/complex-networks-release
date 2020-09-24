@@ -1,4 +1,6 @@
-# MRI Reconstruction - Unrolled Architecture
+Implementation related to the paper "Complex-Valued Convolutional Neural Networks for MRI Reconstruction" by Elizabeth K. Cole et. al: https://arxiv.org/abs/2004.01738
+
+# Complex-Valued MRI Reconstruction - Unrolled Architecture
 Image Reconstruction using an Unrolled DL Architecture including Complex-Valued Convolution and Activation Functions
 * 2018 Elizabeth Cole, Stanford University (ekcole@stanford.edu)
 * 2018 Joseph Y. Cheng, Stanford University
