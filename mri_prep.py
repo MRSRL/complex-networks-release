@@ -25,7 +25,7 @@ def download_dataset_knee(dir_out, dir_tmp="tmp", verbose=False, do_cleanup=True
     else:
         os.makedirs(dir_tmp)
 
-    num_data = 20
+    num_data = 1
     for i in range(num_data):
         if verbose:
             print("Processing data (%d)..." % i)

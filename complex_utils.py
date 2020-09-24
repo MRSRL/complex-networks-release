@@ -185,6 +185,98 @@ def complex_conv_transpose(tf_input, num_features, kernel_size, stride, data_for
     return tf_output
 
 
+def complex_conv1d(
+    tf_input, num_features, kernel_size, stride=1, data_format="channels_last", dilation_rate=(1), use_bias=True,
+    kernel_initializer=None, kernel_regularizer=None, bias_regularizer=None,
+    activity_regularizer=None, kernel_constraint=None, bias_constraint=None, trainable=True
+):
+    # allocate half the features to real, half to imaginary
+    num_features = num_features // 2
+
+    tf_real = tf.real(tf_input)
+    tf_imag = tf.imag(tf_input)
+
+    with tf.variable_scope(None, default_name="complex_conv1d"):
+        tf_real_real = tf.layers.conv1d(
+            inputs=tf_real,
+            filters=num_features,
+            kernel_size=kernel_size,
+            strides=stride,
+            padding="same",
+            data_format=data_format,
+            dilation_rate=dilation_rate,
+            activation=None,
+            use_bias=use_bias,
+            kernel_initializer=kernel_initializer,
+            kernel_regularizer=None,
+            bias_regularizer=None,
+            activity_regularizer=None,
+            kernel_constraint=None,
+            bias_constraint=None,
+            name="real_conv",
+        )
+        tf_imag_real = tf.layers.conv1d(
+            tf_imag,
+            filters=num_features,
+            kernel_size=kernel_size,
+            strides=stride,
+            padding="same",
+            data_format=data_format,
+            dilation_rate=dilation_rate,
+            activation=None,
+            use_bias=use_bias,
+            kernel_initializer=kernel_initializer,
+            kernel_regularizer=None,
+            bias_regularizer=None,
+            activity_regularizer=None,
+            kernel_constraint=None,
+            bias_constraint=None,
+            name="real_conv",
+            reuse=True,
+        )
+        tf_real_imag = tf.layers.conv1d(
+            tf_real,
+            filters=num_features,
+            kernel_size=kernel_size,
+            strides=stride,
+            padding="same",
+            data_format=data_format,
+            dilation_rate=dilation_rate,
+            activation=None,
+            use_bias=use_bias,
+            kernel_initializer=kernel_initializer,
+            kernel_regularizer=None,
+            bias_regularizer=None,
+            activity_regularizer=None,
+            kernel_constraint=None,
+            bias_constraint=None,
+            name="imag_conv",
+        )
+        tf_imag_imag = tf.layers.conv1d(
+            tf_imag,
+            filters=num_features,
+            kernel_size=kernel_size,
+            strides=stride,
+            padding="same",
+            data_format=data_format,
+            dilation_rate=dilation_rate,
+            activation=None,
+            use_bias=use_bias,
+            kernel_initializer=kernel_initializer,
+            kernel_regularizer=None,
+            bias_regularizer=None,
+            activity_regularizer=None,
+            kernel_constraint=None,
+            bias_constraint=None,
+            name="imag_conv",
+            reuse=True,
+        )
+    real_out = tf_real_real - tf_imag_imag
+    imag_out = tf_imag_real + tf_real_imag
+    tf_output = tf.complex(real_out, imag_out)
+
+    return tf_output
+
 def zrelu(x):
     # x and tf_output are complex-valued
     phase = tf.angle(x)
