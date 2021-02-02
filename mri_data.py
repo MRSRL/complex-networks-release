@@ -140,7 +140,7 @@ def create_dataset(train_data_dir, mask_data_dir,
                    batch_size=16,
                    buffer_size=10,
                    out_shape=[80, 180],
-                   num_channels=6, num_emaps=2,
+                   num_channels=6, num_emaps=1,
                    verbose=True,
                    random_seed=0,
                    name="create_dataset"):

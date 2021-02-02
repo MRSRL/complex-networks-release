@@ -116,6 +116,10 @@ FLAGS = tf.app.flags.FLAGS
 
 
 def main(_):
+    if FLAGS.batch_size is not 1:
+        print("Error: to test images, batch size must be 1")
+        exit()
+
     model_dir = os.path.join(FLAGS.log_root, FLAGS.train_dir)
     if not os.path.exists(FLAGS.log_root):
         os.makedirs(FLAGS.log_root)

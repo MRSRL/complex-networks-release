@@ -14,6 +14,8 @@ import mri_data
 import mri_model
 from mri_util import fftc, metrics, tf_util
 
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+
 tf.app.flags.DEFINE_string("gpu", "single", "Single or multi GPU Mode")
 tf.app.flags.DEFINE_string("conv", "real", "Real or complex convolution")
 tf.app.flags.DEFINE_boolean("do_conjugate", "False", "Complex conjugate")

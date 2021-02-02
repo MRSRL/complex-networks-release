@@ -12,13 +12,12 @@ import tensorflow as tf
 from tensorflow.python.util import deprecation
 
 # import mri_data
-import mri_data_cc as mri_data
-from models import mri_model_original as mri_model
-
-# from models import mri_model
+import mri_data
+import mri_model
 from mri_util import cfl, fftc, metrics, tf_util
 
-BIN_BART = "bart"
+# BIN_BART = "bart"
+BIN_BART = "/home/sandino/bart/bart-0.4.03/bart"
 
 deprecation._PRINT_DEPRECATION_WARNINGS = False
 
@@ -35,7 +34,8 @@ tf.app.flags.DEFINE_integer("feat_map", 128, "Number of feature maps")
 
 tf.app.flags.DEFINE_integer("shape_y", 180, "Image shape in Y")
 tf.app.flags.DEFINE_integer("shape_z", 80, "Image shape in Z")
-tf.app.flags.DEFINE_integer("num_channels", 8, "Number of channels for input datasets.")
+tf.app.flags.DEFINE_integer(
+    "num_channels", 8, "Number of channels for input datasets.")
 tf.app.flags.DEFINE_integer(
     "num_emaps", 1, "Number of eigen maps for input sensitivity maps."
 )
@@ -80,17 +80,21 @@ tf.app.flags.DEFINE_boolean(
 
 # Optimization Flags
 tf.app.flags.DEFINE_string("device", "0", "GPU device to use.")
-tf.app.flags.DEFINE_integer("batch_size", 4, "The number of samples in each batch.")
+tf.app.flags.DEFINE_integer(
+    "batch_size", 4, "The number of samples in each batch.")
 
 tf.app.flags.DEFINE_float(
     "adam_beta2", 0.999, "The exponential decay rate for the 2nd moment estimates."
 )
-tf.app.flags.DEFINE_float("opt_epsilon", 1.0, "Epsilon term for the optimizer.")
+tf.app.flags.DEFINE_float(
+    "opt_epsilon", 1.0, "Epsilon term for the optimizer.")
 tf.app.flags.DEFINE_float("learning_rate", 0.001, "Initial learning rate.")
-tf.app.flags.DEFINE_integer("max_steps", None, "The maximum number of training steps.")
+tf.app.flags.DEFINE_integer(
+    "max_steps", None, "The maximum number of training steps.")
 
 # Dataset Flags
-tf.app.flags.DEFINE_string("mask_path", "masks", "Directory where masks are located.")
+tf.app.flags.DEFINE_string(
+    "mask_path", "masks", "Directory where masks are located.")
 tf.app.flags.DEFINE_string(
     "train_path", "train", "Sub directory where training data are located."
 )
@@ -106,7 +110,8 @@ tf.app.flags.DEFINE_string(
     "mode", "train_validate", "Train_validate, train, or predict"
 )
 
-tf.app.flags.DEFINE_string("activation", "relu", "The activation function used")
+tf.app.flags.DEFINE_string(
+    "activation", "relu", "The activation function used")
 # If not defined will loop through entire test directory
 tf.app.flags.DEFINE_integer("num_cases", None, "The number of inference files")
 
@@ -117,6 +122,9 @@ FLAGS = tf.app.flags.FLAGS
 
 
 def main(_):
+    if FLAGS.batch_size is not 1:
+        print("Error: to test images, batch size must be 1")
+        exit()
     model_dir = os.path.join(FLAGS.log_root, FLAGS.train_dir)
     if not os.path.exists(FLAGS.log_root):
         os.makedirs(FLAGS.log_root)
@@ -157,7 +165,7 @@ def main(_):
             os.path.join(FLAGS.dataset_dir, "test_images"),
             FLAGS.mask_path,
             num_channels=FLAGS.num_channels,
-            num_maps=FLAGS.num_emaps,
+            num_emaps=FLAGS.num_emaps,
             batch_size=FLAGS.batch_size,
             out_shape=out_shape,
         )
@@ -165,7 +173,8 @@ def main(_):
         # placeholders
         ks_shape = [None, FLAGS.shape_z, FLAGS.shape_y, FLAGS.num_channels]
         ks_place = tf.placeholder(tf.complex64, ks_shape)
-        sense_shape = [None, FLAGS.shape_z, FLAGS.shape_y, 1, FLAGS.num_channels]
+        sense_shape = [None, FLAGS.shape_z,
+                       FLAGS.shape_y, 1, FLAGS.num_channels]
         sense_place = tf.placeholder(tf.complex64, sense_shape)
         im_shape = [None, FLAGS.shape_z, FLAGS.shape_y, 1]
         im_truth_place = tf.placeholder(tf.complex64, im_shape)
@@ -247,11 +256,13 @@ def main(_):
             if FLAGS.conv == "complex":
                 mag_images = np.squeeze(
                     np.absolute(
-                        np.concatenate((im_out, bart_test, im_truth_run), axis=2)
+                        np.concatenate(
+                            (im_out, bart_test, im_truth_run), axis=2)
                     )
                 )
                 phase_images = np.squeeze(
-                    np.angle(np.concatenate((im_out, bart_test, im_truth_run), axis=2))
+                    np.angle(np.concatenate(
+                        (im_out, bart_test, im_truth_run), axis=2))
                 )
                 diff_out = im_truth_run - im_out
 
@@ -299,7 +310,8 @@ def main(_):
             filename = image_dir + "/diff_mag_" + str(test_file) + ".npy"
             np.save(filename, diff_mag)
 
-            psnr, nrmse, ssim = metrics.compute_all(im_truth_run, im_out, sos_axis=-1)
+            psnr, nrmse, ssim = metrics.compute_all(
+                im_truth_run, im_out, sos_axis=-1)
             output_psnr.append(psnr)
             output_nrmse.append(nrmse)
             output_ssim.append(ssim)
@@ -394,62 +406,17 @@ def bart_cs(bart_dir, ks, sensemap, l1=0.01):
     cfl.write(sense_dir, cfl_sensemap, "R")
 
     # L1-wavelet regularized
-    cmd_flags = "-S -e -R W:0:0:%f -i 100" % l1
+    cmd_flags = "-S -e -R W:3:0:%f -i 100" % l1
 
-    cmd = "%s pics %s %s %s %s" % (BIN_BART, cmd_flags, ks_dir, sense_dir, img_dir,)
+    cmd = "%s pics %s %s %s %s" % (
+        BIN_BART, cmd_flags, ks_dir, sense_dir, img_dir,)
     subprocess.check_call(["bash", "-c", cmd])
     bart_recon = load_recon(img_dir, sense_dir)
     return bart_recon
 
 
-# def bart_cs(bart_dir, ks, sensemap, l1=0.01):
-#     # Troubleshoot dims by "bart show -m file_ks"
-#     # get rid of batch dim
-#     cfl_ks = np.squeeze(ks)
-#     if cfl_ks.ndim == 3:
-#         cfl_ks = np.transpose(cfl_ks, [-1, 1, 0])
-#     if cfl_ks.ndim == 4:
-#         # 2D plus time: x, y, t, coils to 1, t, 1, 1, coils, z, y, x
-#         cfl_ks = np.transpose(cfl_ks, [2, 3, 1, 0])
-#         cfl_ks = np.expand_dims(cfl_ks, axis=2)
-#         cfl_ks = np.expand_dims(cfl_ks, axis=1)
-
-#     cfl_sensemap = np.squeeze(sensemap)
-#     if cfl_sensemap.ndim == 2:
-#         cfl_sensemap = np.transpose(cfl_sensemap, [1, 0])
-#         cfl_sensemap = np.expand_dims(cfl_sensemap, axis=0)
-#     if cfl_sensemap.ndim == 3:
-#         # 2D plus time: x, y, coils to coils, 1, z, y, x
-#         cfl_sensemap = np.expand_dims(cfl_sensemap, axis=2)
-#         cfl_sensemap = np.transpose(cfl_sensemap, [3, 2, 1, 0])
-#         cfl_sensemap = np.expand_dims(cfl_sensemap, axis=0)
-
-#     ks_dir = os.path.join(bart_dir, "file_ks")
-#     sense_dir = os.path.join(bart_dir, "file_sensemap")
-#     img_dir = os.path.join(bart_dir, "file_img")
-#     cfl.write(ks_dir, cfl_ks)
-#     cfl.write(sense_dir, cfl_sensemap)
-
-#     # file_ks = os.path.join(os.getcwd(), ks_dir)
-#     # file_sensemap = os.path.join(os.getcwd(), sense_dir)
-#     # file_img = "bart_recon/file_img"
-
-#     # L1-wavelet regularized
-#     cmd_flags = ("-S -e -R W:3:0:%f -i 100" % l1)
-#     # Low-rank
-#     # might be 3:3
-#     # cmd_flags = "-S -e -R L:7:7:%f -i 100" % l1
-#     cmd = "%s pics %s %s %s %s" % (BIN_BART, cmd_flags, ks_dir, sense_dir, img_dir)
-#     subprocess.check_call(["bash", "-c", cmd])
-#     bart_recon = load_recon(img_dir, sense_dir)
-#     return bart_recon
-
-
 def load_recon(file, file_sensemap):
     bart_recon = np.squeeze(cfl.read(file))
-    #         print("bart recon")
-    #         print(bart_recon.ndim)
-    # 18, 80, 180
     if bart_recon.ndim == 2:
         bart_recon = np.transpose(bart_recon, [1, 0])
         bart_recon = np.expand_dims(bart_recon, axis=0)
@@ -468,16 +435,6 @@ def calculate_metrics(output, bart_test, truth):
     output_psnr = []
     output_nrmse = []
     output_ssim = []
-
-    # complex_truth = tf_util.channels_to_complex(sample_truth)
-    # complex_truth = sess.run(complex_truth)
-
-    # psnr, nrmse, ssim = metrics.compute_all(complex_truth, bart_test, sos_axis=-1)
-    # cs_psnr.append(psnr)
-    # cs_nrmse.append(nrmse)
-    # cs_ssim.append(ssim)
-    # print("truth", truth.shape)
-    # print("output", output.shape)
 
     psnr, nrmse, ssim = metrics.compute_all(truth, output, sos_axis=-1)
     output_psnr.append(psnr)
@@ -521,19 +478,23 @@ def _create_summary(sense_place, ks_place, im_out_place, im_truth_place):
         summary_output = tf_util.sumofsq(ks_output, keep_dims=True)
         summary_truth = tf_util.sumofsq(ks_truth, keep_dims=True)
         summary_fft = tf.log(
-            tf.concat((summary_input, summary_output, summary_truth), axis=2) + 1e-6
+            tf.concat((summary_input, summary_output,
+                       summary_truth), axis=2) + 1e-6
         )
-        tf.summary.image("kspace", summary_fft, max_outputs=FLAGS.num_summary_image)
+        tf.summary.image("kspace", summary_fft,
+                         max_outputs=FLAGS.num_summary_image)
         summary_input = tf_util.sumofsq(image_input, keep_dims=True)
         summary_output = tf_util.sumofsq(image_output, keep_dims=True)
         summary_truth = tf_util.sumofsq(image_truth, keep_dims=True)
         summary_image = tf.concat(
             (summary_input, summary_output, summary_truth), axis=2
         )
-        tf.summary.image("image", summary_image, max_outputs=FLAGS.num_summary_image)
+        tf.summary.image("image", summary_image,
+                         max_outputs=FLAGS.num_summary_image)
 
     with tf.name_scope("truth"):
-        summary_truth_real = tf.reduce_sum(image_truth, axis=-1, keep_dims=True)
+        summary_truth_real = tf.reduce_sum(
+            image_truth, axis=-1, keep_dims=True)
         summary_truth_real = tf.real(summary_truth_real)
         tf.summary.image(
             "image_real", summary_truth_real, max_outputs=FLAGS.num_summary_image
@@ -541,16 +502,20 @@ def _create_summary(sense_place, ks_place, im_out_place, im_truth_place):
 
     with tf.name_scope("mask"):
         summary_mask = tf_util.sumofsq(mask_input, keep_dims=True)
-        tf.summary.image("mask", summary_mask, max_outputs=FLAGS.num_summary_image)
+        tf.summary.image("mask", summary_mask,
+                         max_outputs=FLAGS.num_summary_image)
 
     with tf.name_scope("sensemap"):
-        summary_map = tf.slice(tf.abs(sensemap), [0, 0, 0, 0, 0], [-1, -1, -1, 1, -1])
+        summary_map = tf.slice(
+            tf.abs(sensemap), [0, 0, 0, 0, 0], [-1, -1, -1, 1, -1])
         summary_map = tf.transpose(summary_map, [0, 1, 4, 2, 3])
         summary_map = tf.reshape(
-            summary_map, [tf.shape(summary_map)[0], tf.shape(summary_map)[1], -1]
+            summary_map, [tf.shape(summary_map)[0],
+                          tf.shape(summary_map)[1], -1]
         )
         summary_map = tf.expand_dims(summary_map, axis=-1)
-        tf.summary.image("image", summary_map, max_outputs=FLAGS.num_summary_image)
+        tf.summary.image("image", summary_map,
+                         max_outputs=FLAGS.num_summary_image)
 
 
 if __name__ == "__main__":

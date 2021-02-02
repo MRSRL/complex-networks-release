@@ -7,35 +7,21 @@ ITERATIONS=4        #number of unrolled iterations
 FEAT=128            #number of feature maps
 ACTIVATION=relu  #activation function
 
-LOG_DIR="f"$FEAT"_g"$ITERATIONS
+#To test images, batch size has to be 1
 
+LOG_DIR="f"$FEAT"_g"$ITERATIONS
 # training
-python3 $WORK_DIR/train_loop.py \
+python3 $WORK_DIR/test_images.py \
     --train_dir $TYPE"_"$ACTIVATION \
     --mask_path $MASKS_PATH \
     --dataset_dir $DATASET_DIR \
     --log_root $LOG_DIR \
     --shape_z 256 --shape_y 320 \
     --num_channels 8 \
-    --batch_size 2 \
+    --batch_size 1 \
     --device 0 \
     --max_steps 10000 \
     --feat_map $FEAT \
     --num_grad_steps $ITERATIONS \
     --activation $ACTIVATION \
     --conv $TYPE
-
-# testing
-# python3 $WORK_DIR/test_loop.py --train_dir $TYPE \
-#     --shape_z 256 --shape_y 320 \
-#     --batch_size 1 \
-#     --feat_map $FEAT \
-#     --num_grad_steps 4 \
-#     --mask_path $MASKS_PATH \
-#     --dataset_dir $DATASET_DIR \
-#     --device 0 \
-#     --log_root $LOG_DIR \
-#     --num_channels 8 \
-#     --activation $ACTIVATION \
-#     --gpu single \
-#     --conv $TYPE

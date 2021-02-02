@@ -4,13 +4,15 @@ import sys
 
 import numpy as np
 import tensorflow as tf
-from tensorflow.python.util import deprecation
+# from tensorflow.python.util import deprecation
 
 import complex_utils
 from mri_util import tf_util
 
-deprecation._PRINT_DEPRECATION_WARNINGS = False
-tf.logging.set_verbosity(tf.logging.ERROR)
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+
+# deprecation._PRINT_DEPRECATION_WARNINGS = False
+# tf.logging.set_verbosity(tf.logging.ERROR)
 
 
 def _batch_norm(tf_input, data_format="channels_last", training=False):
@@ -115,7 +117,7 @@ def _conv2d(
 
         if num_features != 2:
             num_features = num_features // 2
-            
+
         tf_output = complex_utils.complex_conv(
             tf_output, num_features=num_features, kernel_size=kernel_size)
 
