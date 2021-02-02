@@ -62,6 +62,32 @@ in this directory.
 
 Various complex-valued utility functions are in complex_utils.py. This includes complex-valued convolution, complex-valued transposed convolution, and various complex-valeud activation functions such as CReLU, zReLU, modReLU, and cardioid.
 
+## Testing
+Testing can be run using a similar script to training, found in test_script. One such example is:
+
+    TYPE=complex
+    ITERATIONS=4
+    FEAT=256
+    ACTIVATION=cardioid
+    LOG_DIR="f"$FEAT"_g"$ITERATIONS
+    python3 test_images.py \
+        --train_dir $TYPE"_"$ACTIVATION \
+        --mask_path masks \
+        --dataset_dir data \
+        --log_root $LOG_DIR \
+        --shape_z 256 --shape_y 320 \
+        --num_channels 8 \
+        --batch_size 2 \
+        --device 0 \
+        --max_steps 50000 \
+        --feat_map $FEAT \
+        --num_grad_steps $ITERATIONS \
+        --activation $ACTIVATION \
+        --conv $TYPE
+
+This script will run a deep learning reconstruction on a trained model with the specified parameters. It will also perform CS reconstructions using BART, and compute aggregate image metrics PSNR, SSIM, and NRMSE for each test image. Test images will be saved
+in a folder entitled "images" in the model directory.
+
 ## References
 1. https://github.com/mrirecon/bart
 2. http://mridata.org
