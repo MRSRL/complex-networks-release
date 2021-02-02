@@ -134,8 +134,6 @@ def main(_):
     if not os.path.exists(bart_dir):
         os.makedirs(bart_dir)
 
-    # im_head = "/home/ekcole/Workspace/mfast_combined/"
-    # im_dir = os.path.join(im_head, FLAGS.train_dir)
     image_dir = os.path.join(model_dir, "images")
     if not os.path.exists(image_dir):
         os.makedirs(image_dir)
@@ -245,7 +243,7 @@ def main(_):
             # CS recon
             bart_test = bart_cs(bart_dir, ks_in_run, sense_in_run, l1=FLAGS.l1)
 
-            # print("rotating")
+            # Rotating images
             # im_in_run = np.rot90(np.squeeze(im_in_run), k=3)
             # im_out = np.rot90(np.squeeze(im_out), k=3)
             # bart_test = np.rot90(np.squeeze(bart_test), k=3)
