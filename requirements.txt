@@ -1,7 +1,7 @@
 matplotlib>=1.5.1
 numpy>=1.14.0
 scipy>=0.19.1
-tensorflow-gpu==1.14.0
+tensorflow-gpu==2.9.3
 wget>=3.2
 mimir
 resampy
